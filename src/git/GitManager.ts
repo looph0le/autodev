@@ -1,4 +1,5 @@
-import { simpleGit, SimpleGit, SimpleGitOptions } from 'simple-git';
+import { simpleGit } from 'simple-git';
+import type { SimpleGit, SimpleGitOptions } from 'simple-git';
 
 export interface GitConfig {
   baseBranch: string;
@@ -35,8 +36,16 @@ export class GitManager {
   async createBranch(taskId: string): Promise<string> {
     const branchName = `feature/task-${taskId}`;
     
-    // Ensure we are on the base branch and it's clean (optional, but safer)
-    await this.git.checkout(this.config.baseBranch);
+    // Try to get the current branch, if none exists (unborn repo), this might throw or return empty.
+    const currentBranch = await this.getCurrentBranch();
+
+    if (currentBranch !== 'unknown') {
+      try {
+        await this.git.checkout(this.config.baseBranch);
+      } catch (e) {
+        console.warn(`Could not checkout base branch '${this.config.baseBranch}'. Falling back to current branch '${currentBranch}'.`);
+      }
+    }
     
     // Create and checkout new branch
     await this.git.checkoutLocalBranch(branchName);

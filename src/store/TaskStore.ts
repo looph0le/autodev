@@ -3,11 +3,19 @@ import { TaskSchema, TaskState, AgentLogSchema } from '../types/task-schema.js';
 import type { Task, AgentLog } from '../types/task-schema.js';
 
 export class TaskStore {
+  private static instance: TaskStore;
   private db: Database.Database;
 
   constructor(dbPath: string = 'autodev.db') {
     this.db = new Database(dbPath);
     this.init();
+  }
+
+  public static getInstance(dbPath?: string): TaskStore {
+    if (!TaskStore.instance) {
+      TaskStore.instance = new TaskStore(dbPath);
+    }
+    return TaskStore.instance;
   }
 
   private init() {
@@ -64,10 +72,11 @@ export class TaskStore {
   }
 
   getTask(id: string): Task | null {
-    const taskRow = this.db.prepare('SELECT * FROM tasks WHERE id = ?').get(id) as any;
+    const taskRow = this.db.prepare('SELECT * FROM tasks WHERE id LIKE ?').get(id + '%') as any;
     if (!taskRow) return null;
 
-    const logRows = this.db.prepare('SELECT * FROM logs WHERE taskId = ? ORDER BY timestamp ASC').all(id) as any[];
+    const fullId = taskRow.id;
+    const logRows = this.db.prepare('SELECT * FROM logs WHERE taskId = ? ORDER BY timestamp ASC').all(fullId) as any[];
 
     const taskData = {
       ...taskRow,
