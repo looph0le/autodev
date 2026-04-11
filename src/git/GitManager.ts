@@ -1,4 +1,5 @@
-import { simpleGit, SimpleGit, SimpleGitOptions } from 'simple-git';
+import { simpleGit } from 'simple-git';
+import type { SimpleGit, SimpleGitOptions } from 'simple-git';
 
 export interface GitConfig {
   baseBranch: string;

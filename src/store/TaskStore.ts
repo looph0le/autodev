@@ -3,11 +3,19 @@ import { TaskSchema, TaskState, AgentLogSchema } from '../types/task-schema.js';
 import type { Task, AgentLog } from '../types/task-schema.js';
 
 export class TaskStore {
+  private static instance: TaskStore;
   private db: Database.Database;
 
   constructor(dbPath: string = 'autodev.db') {
     this.db = new Database(dbPath);
     this.init();
+  }
+
+  public static getInstance(dbPath?: string): TaskStore {
+    if (!TaskStore.instance) {
+      TaskStore.instance = new TaskStore(dbPath);
+    }
+    return TaskStore.instance;
   }
 
   private init() {

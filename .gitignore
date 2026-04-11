@@ -1,0 +1,9 @@
+/dist
+
+.env*
+
+.DS_store
+
+autodev.db
+
+/node_modules
